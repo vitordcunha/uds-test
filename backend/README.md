@@ -6,12 +6,44 @@ Backend API desenvolvido com Node.js, TypeScript e Express para o sistema de Kan
 
 - Node.js 18+ 
 - npm ou yarn
+- Docker e Docker Compose (para o banco de dados PostgreSQL)
 
 ## Instalação
 
 ```bash
 npm install
 ```
+
+## Configuração do Banco de Dados (PostgreSQL)
+
+O projeto utiliza PostgreSQL como banco de dados. Para facilitar o desenvolvimento, foi configurado um `docker-compose.yml` que cria uma instância PostgreSQL.
+
+### Iniciar o banco de dados
+
+```bash
+cd backend
+docker-compose up -d
+```
+
+Isso irá iniciar o PostgreSQL na porta `5432` com as seguintes configurações:
+- **Database**: `kanban_board`
+- **Username**: `postgres`
+- **Password**: `postgres`
+- **Port**: `5432`
+
+### Parar o banco de dados
+
+```bash
+docker-compose down
+```
+
+### Parar e remover volumes (resetar o banco de dados)
+
+```bash
+docker-compose down -v
+```
+
+O banco de dados estará disponível em `localhost:5432` e corresponde à configuração do `DATABASE_URL` no arquivo `.env`. Os dados são persistidos em um volume Docker, então sobrevivem a reinicializações do container.
 
 ## Scripts
 
@@ -73,5 +105,5 @@ O projeto usa `tsx` para execução direta de TypeScript em desenvolvimento, sem
 
 ## Notas
 
-- O armazenamento atual é em memória (volátil). Em produção, será necessário implementar um banco de dados.
+- O projeto utiliza PostgreSQL como banco de dados. Use o Docker Compose para iniciar o banco de dados localmente.
 - O servidor está configurado com CORS habilitado para permitir requisições do frontend.
