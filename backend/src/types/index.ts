@@ -1,24 +1,15 @@
-// Domain entities types
-export interface Board {
-  id: string;
-  name: string;
-  columns?: Column[];
-}
+import { InferSelectModel, InferInsertModel } from "drizzle-orm";
+import { boards, columns, cards } from "../db/schema";
 
-export interface Column {
-  id: string;
-  name: string;
-  boardId: string;
-  cards?: Card[];
-  order?: number;
-}
+// Domain entities types - inferred from Drizzle schema
+export type Board = InferSelectModel<typeof boards>;
+export type Column = InferSelectModel<typeof columns>;
+export type Card = InferSelectModel<typeof cards>;
 
-export interface Card {
-  id: string;
-  title: string;
-  description?: string;
-  columnId: string;
-}
+// Insert types - for creating new records
+export type InsertBoard = InferInsertModel<typeof boards>;
+export type InsertColumn = InferInsertModel<typeof columns>;
+export type InsertCard = InferInsertModel<typeof cards>;
 
 // API request/response types
 export interface CreateBoardRequest {
