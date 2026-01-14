@@ -7,6 +7,7 @@ Frontend da aplicação Mini-Kanban desenvolvido com React, TypeScript e Vite.
 - **React 19** - Biblioteca JavaScript para construção de interfaces
 - **TypeScript** - Superset do JavaScript com tipagem estática
 - **Vite** - Build tool e dev server rápido
+- **Tailwind CSS v4** - Framework CSS utility-first para estilização
 - **TanStack Query (React Query)** - Biblioteca para gerenciamento de estado assíncrono e cache de dados
 - **Axios** - Cliente HTTP para comunicação com a API
 
