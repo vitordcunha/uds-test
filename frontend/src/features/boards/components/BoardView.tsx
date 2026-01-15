@@ -9,7 +9,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { useBoard } from "../../../hooks/useBoards";
-import { useMoveCard } from "../../../hooks/useCards";
+import { useMoveCard, useDeleteCard } from "../../../hooks/useCards";
 import { Column } from "../../columns/components/Column";
 import { Card as CardComponent } from "../../cards/components/Card";
 import type { Card } from "../../../types";
@@ -21,6 +21,7 @@ interface BoardViewProps {
 export function BoardView({ boardId }: BoardViewProps) {
   const { data: board, isLoading, error } = useBoard(boardId);
   const moveCardMutation = useMoveCard(boardId);
+  const deleteCardMutation = useDeleteCard(boardId);
   const [activeCard, setActiveCard] = useState<Card | null>(null);
 
   const sensors = useSensors(
@@ -78,8 +79,9 @@ export function BoardView({ boardId }: BoardViewProps) {
   };
 
   const handleDeleteCard = (cardId: string) => {
-    // TODO: Implementar confirmação e exclusão
-    console.log("Delete card:", cardId);
+    if (confirm("Tem certeza que deseja excluir este card?")) {
+      deleteCardMutation.mutate(cardId);
+    }
   };
 
   if (isLoading) {
