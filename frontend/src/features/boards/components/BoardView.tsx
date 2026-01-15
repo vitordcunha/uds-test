@@ -12,6 +12,9 @@ import { useBoard } from "../../../hooks/useBoards";
 import { useMoveCard, useDeleteCard } from "../../../hooks/useCards";
 import { Column } from "../../columns/components/Column";
 import { Card as CardComponent } from "../../cards/components/Card";
+import { CreateCardForm } from "../../cards/components/CreateCardForm";
+import { EditCardForm } from "../../cards/components/EditCardForm";
+import { Modal } from "../../../shared/components/ui/Modal";
 import type { Card } from "../../../types";
 
 interface BoardViewProps {
@@ -23,6 +26,8 @@ export function BoardView({ boardId }: BoardViewProps) {
   const moveCardMutation = useMoveCard(boardId);
   const deleteCardMutation = useDeleteCard(boardId);
   const [activeCard, setActiveCard] = useState<Card | null>(null);
+  const [addingCardToColumn, setAddingCardToColumn] = useState<string | null>(null);
+  const [editingCard, setEditingCard] = useState<Card | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -69,13 +74,19 @@ export function BoardView({ boardId }: BoardViewProps) {
   };
 
   const handleAddCard = (columnId: string) => {
-    // TODO: Implementar modal para criar card
-    console.log("Add card to column:", columnId);
+    setAddingCardToColumn(columnId);
   };
 
   const handleEditCard = (card: Card) => {
-    // TODO: Implementar modal para editar card
-    console.log("Edit card:", card);
+    setEditingCard(card);
+  };
+
+  const handleCloseCreateModal = () => {
+    setAddingCardToColumn(null);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditingCard(null);
   };
 
   const handleDeleteCard = (cardId: string) => {
@@ -167,6 +178,37 @@ export function BoardView({ boardId }: BoardViewProps) {
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      {/* Modals */}
+      <Modal
+        isOpen={addingCardToColumn !== null}
+        onClose={handleCloseCreateModal}
+        title="Criar Novo Card"
+      >
+        {addingCardToColumn && (
+          <CreateCardForm
+            columnId={addingCardToColumn}
+            boardId={boardId}
+            onSuccess={handleCloseCreateModal}
+            onCancel={handleCloseCreateModal}
+          />
+        )}
+      </Modal>
+
+      <Modal
+        isOpen={editingCard !== null}
+        onClose={handleCloseEditModal}
+        title="Editar Card"
+      >
+        {editingCard && (
+          <EditCardForm
+            card={editingCard}
+            boardId={boardId}
+            onSuccess={handleCloseEditModal}
+            onCancel={handleCloseEditModal}
+          />
+        )}
+      </Modal>
     </div>
   );
 }
