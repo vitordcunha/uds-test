@@ -1,0 +1,1 @@
+export { MoveCardDTO } from './MoveCardDTO';

@@ -1,4 +1,4 @@
-import { BoardName } from '../value-objects/BoardName';
+import { BoardName } from "../value-objects/BoardName";
 
 export class Board {
   private _id?: string;
