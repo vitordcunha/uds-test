@@ -19,10 +19,12 @@ import { CardController } from "./presentation/http/controllers/CardController";
 import { errorHandler } from "./presentation/http/middlewares/errorHandler";
 
 // Routes
-import boardsRouter from "./routes/boards";
-import columnsRouter from "./routes/columns";
-import cardsRouter from "./routes/cards";
-import cardOperationsRouter from "./routes/cardOperations";
+import {
+  boardsRouter,
+  columnsRouter,
+  cardsRouter,
+  cardOperationsRouter,
+} from "./routes";
 
 dotenv.config();
 

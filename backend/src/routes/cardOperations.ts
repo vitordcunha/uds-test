@@ -12,9 +12,4 @@ router.delete("/:id", (req, res) => {
   res.status(204).send();
 });
 
-// PATCH /api/cards/:id/move - Move a card to a different column
-router.patch("/:id/move", (req, res) => {
-  res.json({ message: "Card moved successfully" });
-});
-
 export default router;
