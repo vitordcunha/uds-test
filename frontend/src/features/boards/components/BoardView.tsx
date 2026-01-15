@@ -14,7 +14,10 @@ import { Column } from "../../columns/components/Column";
 import { Card as CardComponent } from "../../cards/components/Card";
 import { CreateCardForm } from "../../cards/components/CreateCardForm";
 import { EditCardForm } from "../../cards/components/EditCardForm";
+import { CreateColumnForm } from "../../columns/components/CreateColumnForm";
 import { Modal } from "../../../shared/components/ui/Modal";
+import { ConfirmDialog } from "../../../shared/components/feedback/ConfirmDialog";
+import { Button } from "../../../shared/components/ui/Button";
 import type { Card } from "../../../types";
 
 interface BoardViewProps {
@@ -26,8 +29,12 @@ export function BoardView({ boardId }: BoardViewProps) {
   const moveCardMutation = useMoveCard(boardId);
   const deleteCardMutation = useDeleteCard(boardId);
   const [activeCard, setActiveCard] = useState<Card | null>(null);
-  const [addingCardToColumn, setAddingCardToColumn] = useState<string | null>(null);
+  const [addingCardToColumn, setAddingCardToColumn] = useState<string | null>(
+    null
+  );
   const [editingCard, setEditingCard] = useState<Card | null>(null);
+  const [isCreatingColumn, setIsCreatingColumn] = useState(false);
+  const [cardToDelete, setCardToDelete] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -89,10 +96,33 @@ export function BoardView({ boardId }: BoardViewProps) {
     setEditingCard(null);
   };
 
+  const handleCreateColumn = () => {
+    setIsCreatingColumn(true);
+  };
+
+  const handleCloseCreateColumnModal = () => {
+    setIsCreatingColumn(false);
+  };
+
   const handleDeleteCard = (cardId: string) => {
-    if (confirm("Tem certeza que deseja excluir este card?")) {
-      deleteCardMutation.mutate(cardId);
+    setCardToDelete(cardId);
+  };
+
+  const handleConfirmDeleteCard = () => {
+    if (cardToDelete) {
+      deleteCardMutation.mutate(cardToDelete, {
+        onSuccess: () => {
+          setCardToDelete(null);
+        },
+        onError: () => {
+          setCardToDelete(null);
+        },
+      });
     }
+  };
+
+  const handleCancelDeleteCard = () => {
+    setCardToDelete(null);
   };
 
   if (isLoading) {
@@ -132,12 +162,17 @@ export function BoardView({ boardId }: BoardViewProps) {
 
   return (
     <div>
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">{board.name}</h2>
-        <p className="text-gray-600 mt-1">
-          {board.columns?.length || 0}{" "}
-          {board.columns?.length === 1 ? "coluna" : "colunas"}
-        </p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">{board.name}</h2>
+          <p className="text-gray-600 mt-1">
+            {board.columns?.length || 0}{" "}
+            {board.columns?.length === 1 ? "coluna" : "colunas"}
+          </p>
+        </div>
+        <Button variant="primary" onClick={handleCreateColumn}>
+          + Nova Coluna
+        </Button>
       </div>
 
       <DndContext
@@ -159,9 +194,13 @@ export function BoardView({ boardId }: BoardViewProps) {
           {board.columns?.length === 0 && (
             <div className="text-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 w-full">
               <p className="text-gray-600">Nenhuma coluna criada ainda</p>
-              <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <Button
+                variant="primary"
+                onClick={handleCreateColumn}
+                className="mt-4"
+              >
                 Criar Coluna
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -209,6 +248,30 @@ export function BoardView({ boardId }: BoardViewProps) {
           />
         )}
       </Modal>
+
+      <Modal
+        isOpen={isCreatingColumn}
+        onClose={handleCloseCreateColumnModal}
+        title="Criar Nova Coluna"
+      >
+        <CreateColumnForm
+          boardId={boardId}
+          onSuccess={handleCloseCreateColumnModal}
+          onCancel={handleCloseCreateColumnModal}
+        />
+      </Modal>
+
+      <ConfirmDialog
+        isOpen={cardToDelete !== null}
+        onClose={handleCancelDeleteCard}
+        onConfirm={handleConfirmDeleteCard}
+        title="Excluir Card"
+        message="Tem certeza que deseja excluir este card? Esta ação não pode ser desfeita."
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+        loading={deleteCardMutation.isPending}
+      />
     </div>
   );
 }
