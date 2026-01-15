@@ -19,6 +19,23 @@ export class CardRepository implements ICardRepository {
     );
   }
 
+  async findByColumnId(columnId: string): Promise<Card[]> {
+    const results = await db
+      .select()
+      .from(cards)
+      .where(eq(cards.columnId, columnId));
+
+    return results.map(
+      (card) =>
+        new Card(
+          card.title,
+          card.columnId,
+          card.description ?? undefined,
+          card.id
+        )
+    );
+  }
+
   async create(card: Card): Promise<Card> {
     const result = await db
       .insert(cards)

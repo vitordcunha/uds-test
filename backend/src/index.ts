@@ -81,7 +81,9 @@ const moveCardUseCase = new MoveCardBetweenColumns(
 const boardController = new BoardController(
   createBoardUseCase,
   getAllBoardsUseCase,
-  getBoardByIdUseCase
+  getBoardByIdUseCase,
+  columnRepo,
+  cardRepo
 );
 const columnController = new ColumnController(createColumnUseCase);
 const cardController = new CardController(

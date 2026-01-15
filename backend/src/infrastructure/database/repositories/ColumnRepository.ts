@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 import { db } from "../../../db";
 import { columns } from "../../../db/schema";
 import { Column } from "../../../domain/entities/Column";
@@ -16,6 +16,19 @@ export class ColumnRepository implements IColumnRepository {
       columnData.boardId,
       columnData.id,
       columnData.order ?? undefined
+    );
+  }
+
+  async findByBoardId(boardId: string): Promise<Column[]> {
+    const results = await db
+      .select()
+      .from(columns)
+      .where(eq(columns.boardId, boardId))
+      .orderBy(asc(columns.order));
+
+    return results.map(
+      (col) =>
+        new Column(col.name, col.boardId, col.id, col.order ?? undefined)
     );
   }
 

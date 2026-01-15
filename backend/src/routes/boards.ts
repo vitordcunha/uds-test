@@ -10,9 +10,7 @@ export const createBoardsRouter = (boardController: BoardController) => {
   const router = Router();
 
   // GET /api/boards - Get all boards
-  router.get("/", (req, res, next) =>
-    boardController.getAll(req, res, next)
-  );
+  router.get("/", (req, res, next) => boardController.getAll(req, res, next));
 
   // GET /api/boards/:id - Get board by ID
   router.get(
@@ -22,10 +20,8 @@ export const createBoardsRouter = (boardController: BoardController) => {
   );
 
   // POST /api/boards - Create a new board
-  router.post(
-    "/",
-    validate({ body: createBoardSchema }),
-    (req, res, next) => boardController.create(req, res, next)
+  router.post("/", validate({ body: createBoardSchema }), (req, res, next) =>
+    boardController.create(req, res, next)
   );
 
   return router;
