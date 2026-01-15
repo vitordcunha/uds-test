@@ -47,66 +47,80 @@ import { errorHandler } from "./presentation/http/middlewares/errorHandler";
 
 dotenv.config();
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+// Function to create and configure the Express app
+export function createApp() {
+  const app = express();
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+  // Middleware
+  app.use(cors());
+  app.use(express.json());
 
-// Dependency Injection - Repositories
-const boardRepo = new BoardRepository();
-const columnRepo = new ColumnRepository();
-const cardRepo = new CardRepository();
+  // Dependency Injection - Repositories
+  const boardRepo = new BoardRepository();
+  const columnRepo = new ColumnRepository();
+  const cardRepo = new CardRepository();
 
-// Dependency Injection - Use Cases - Board
-const createBoardUseCase = new CreateBoard(boardRepo);
-const getAllBoardsUseCase = new GetAllBoards(boardRepo);
-const getBoardByIdUseCase = new GetBoardById(boardRepo);
+  // Dependency Injection - Use Cases - Board
+  const createBoardUseCase = new CreateBoard(boardRepo);
+  const getAllBoardsUseCase = new GetAllBoards(boardRepo);
+  const getBoardByIdUseCase = new GetBoardById(boardRepo);
 
-// Dependency Injection - Use Cases - Column
-const createColumnUseCase = new CreateColumn(columnRepo, boardRepo);
+  // Dependency Injection - Use Cases - Column
+  const createColumnUseCase = new CreateColumn(columnRepo, boardRepo);
 
-// Dependency Injection - Use Cases - Card
-const createCardUseCase = new CreateCard(cardRepo, columnRepo);
-const updateCardUseCase = new UpdateCard(cardRepo);
-const deleteCardUseCase = new DeleteCard(cardRepo);
-const moveCardUseCase = new MoveCardBetweenColumns(
-  cardRepo,
-  columnRepo,
-  boardRepo
-);
+  // Dependency Injection - Use Cases - Card
+  const createCardUseCase = new CreateCard(cardRepo, columnRepo);
+  const updateCardUseCase = new UpdateCard(cardRepo);
+  const deleteCardUseCase = new DeleteCard(cardRepo);
+  const moveCardUseCase = new MoveCardBetweenColumns(
+    cardRepo,
+    columnRepo,
+    boardRepo
+  );
 
-// Dependency Injection - Controllers
-const boardController = new BoardController(
-  createBoardUseCase,
-  getAllBoardsUseCase,
-  getBoardByIdUseCase,
-  columnRepo,
-  cardRepo
-);
-const columnController = new ColumnController(createColumnUseCase);
-const cardController = new CardController(
-  moveCardUseCase,
-  createCardUseCase,
-  updateCardUseCase,
-  deleteCardUseCase
-);
+  // Dependency Injection - Controllers
+  const boardController = new BoardController(
+    createBoardUseCase,
+    getAllBoardsUseCase,
+    getBoardByIdUseCase,
+    columnRepo,
+    cardRepo
+  );
+  const columnController = new ColumnController(createColumnUseCase);
+  const cardController = new CardController(
+    moveCardUseCase,
+    createCardUseCase,
+    updateCardUseCase,
+    deleteCardUseCase
+  );
 
-// Routes
-app.use("/api/boards", createBoardsRouter(boardController));
-app.use("/api/boards/:boardId/columns", createColumnsRouter(columnController));
-app.use("/api/columns/:columnId/cards", createCardsRouter(cardController));
-app.use("/api/cards", createCardOperationsRouter(cardController));
+  // Routes
+  app.use("/api/boards", createBoardsRouter(boardController));
+  app.use("/api/boards/:boardId/columns", createColumnsRouter(columnController));
+  app.use("/api/columns/:columnId/cards", createCardsRouter(cardController));
+  app.use("/api/cards", createCardOperationsRouter(cardController));
 
-// Health check
-app.get("/health", (req, res) => {
-  res.json({ status: "ok" });
-});
+  // Health check
+  app.get("/health", (req, res) => {
+    res.json({ status: "ok" });
+  });
 
-// Error Handler (must be the last middleware)
-app.use(errorHandler);
+  // Error Handler (must be the last middleware)
+  app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+  return app;
+}
+
+// Create app instance
+const app = createApp();
+
+// Only start server if this file is run directly (not imported)
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
+
+// Export app for testing
+export { app };
