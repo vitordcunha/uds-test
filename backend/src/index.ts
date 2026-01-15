@@ -9,22 +9,41 @@ import {
   CardRepository,
 } from "./infrastructure/database/repositories";
 
-// Use Cases
-import { MoveCardBetweenColumns } from "./application/use-cases/card/MoveCardBetweenColumns";
+// Use Cases - Board
+import {
+  CreateBoard,
+  GetAllBoards,
+  GetBoardById,
+} from "./application/use-cases/board";
+
+// Use Cases - Column
+import { CreateColumn } from "./application/use-cases/column";
+
+// Use Cases - Card
+import {
+  CreateCard,
+  UpdateCard,
+  DeleteCard,
+  MoveCardBetweenColumns,
+} from "./application/use-cases/card";
 
 // Controllers
-import { CardController } from "./presentation/http/controllers/CardController";
-
-// Middlewares
-import { errorHandler } from "./presentation/http/middlewares/errorHandler";
+import {
+  BoardController,
+  ColumnController,
+  CardController,
+} from "./presentation/http/controllers";
 
 // Routes
 import {
-  boardsRouter,
-  columnsRouter,
-  cardsRouter,
-  cardOperationsRouter,
+  createBoardsRouter,
+  createColumnsRouter,
+  createCardsRouter,
+  createCardOperationsRouter,
 } from "./routes";
+
+// Middlewares
+import { errorHandler } from "./presentation/http/middlewares/errorHandler";
 
 dotenv.config();
 
@@ -35,29 +54,48 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Dependency Injection
+// Dependency Injection - Repositories
 const boardRepo = new BoardRepository();
 const columnRepo = new ColumnRepository();
 const cardRepo = new CardRepository();
 
+// Dependency Injection - Use Cases - Board
+const createBoardUseCase = new CreateBoard(boardRepo);
+const getAllBoardsUseCase = new GetAllBoards(boardRepo);
+const getBoardByIdUseCase = new GetBoardById(boardRepo);
+
+// Dependency Injection - Use Cases - Column
+const createColumnUseCase = new CreateColumn(columnRepo, boardRepo);
+
+// Dependency Injection - Use Cases - Card
+const createCardUseCase = new CreateCard(cardRepo, columnRepo);
+const updateCardUseCase = new UpdateCard(cardRepo);
+const deleteCardUseCase = new DeleteCard(cardRepo);
 const moveCardUseCase = new MoveCardBetweenColumns(
   cardRepo,
   columnRepo,
   boardRepo
 );
 
-const cardController = new CardController(moveCardUseCase);
+// Dependency Injection - Controllers
+const boardController = new BoardController(
+  createBoardUseCase,
+  getAllBoardsUseCase,
+  getBoardByIdUseCase
+);
+const columnController = new ColumnController(createColumnUseCase);
+const cardController = new CardController(
+  moveCardUseCase,
+  createCardUseCase,
+  updateCardUseCase,
+  deleteCardUseCase
+);
 
 // Routes
-app.use("/api/boards", boardsRouter);
-app.use("/api/boards/:boardId/columns", columnsRouter);
-app.use("/api/columns/:columnId/cards", cardsRouter);
-app.use("/api/cards", cardOperationsRouter);
-
-// New route with controller
-app.patch("/api/cards/:id/move", (req, res, next) =>
-  cardController.moveCard(req, res, next)
-);
+app.use("/api/boards", createBoardsRouter(boardController));
+app.use("/api/boards/:boardId/columns", createColumnsRouter(columnController));
+app.use("/api/columns/:columnId/cards", createCardsRouter(cardController));
+app.use("/api/cards", createCardOperationsRouter(cardController));
 
 // Health check
 app.get("/health", (req, res) => {

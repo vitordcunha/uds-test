@@ -1,20 +1,23 @@
 import { Router } from "express";
+import { BoardController } from "../presentation/http/controllers/BoardController";
 
-const router = Router();
+export const createBoardsRouter = (boardController: BoardController) => {
+  const router = Router();
 
-// GET /api/boards - Get all boards
-router.get("/", (req, res) => {
-  res.json([{ id: "1", name: "Board 1", columns: [] }]);
-});
+  // GET /api/boards - Get all boards
+  router.get("/", (req, res, next) =>
+    boardController.getAll(req, res, next)
+  );
 
-// GET /api/boards/:id - Get board by ID
-router.get("/:id", (req, res) => {
-  res.json({ id: "1", name: "Board 1", columns: [] });
-});
+  // GET /api/boards/:id - Get board by ID
+  router.get("/:id", (req, res, next) =>
+    boardController.getById(req, res, next)
+  );
 
-// POST /api/boards - Create a new board
-router.post("/", (req, res) => {
-  res.status(201).json({ message: "Board created successfully" });
-});
+  // POST /api/boards - Create a new board
+  router.post("/", (req, res, next) =>
+    boardController.create(req, res, next)
+  );
 
-export default router;
+  return router;
+};

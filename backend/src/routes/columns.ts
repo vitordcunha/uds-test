@@ -1,10 +1,13 @@
 import { Router } from "express";
+import { ColumnController } from "../presentation/http/controllers/ColumnController";
 
-const router = Router({ mergeParams: true });
+export const createColumnsRouter = (columnController: ColumnController) => {
+  const router = Router({ mergeParams: true });
 
-// POST /api/boards/:boardId/columns - Create a new column
-router.post("/", (req, res) => {
-  res.status(201).json({ message: "Column created successfully" });
-});
+  // POST /api/boards/:boardId/columns - Create a new column
+  router.post("/", (req, res, next) =>
+    columnController.create(req, res, next)
+  );
 
-export default router;
+  return router;
+};

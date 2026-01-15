@@ -1,10 +1,13 @@
 import { Router } from "express";
+import { CardController } from "../presentation/http/controllers/CardController";
 
-const router = Router({ mergeParams: true });
+export const createCardsRouter = (cardController: CardController) => {
+  const router = Router({ mergeParams: true });
 
-// POST /api/columns/:columnId/cards - Create a new card
-router.post("/", (req, res) => {
-  res.status(201).json({ message: "Card created successfully" });
-});
+  // POST /api/columns/:columnId/cards - Create a new card
+  router.post("/", (req, res, next) =>
+    cardController.create(req, res, next)
+  );
 
-export default router;
+  return router;
+};
