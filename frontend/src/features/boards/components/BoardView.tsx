@@ -1,4 +1,13 @@
+import {
+  DndContext,
+  type DragEndEvent,
+  type DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
 import { useBoard } from '../../../hooks/useBoards';
+import { useMoveCard } from '../../../hooks/useCards';
 import { Column } from '../../columns/components/Column';
 import type { Card } from '../../../types';
 
@@ -8,6 +17,51 @@ interface BoardViewProps {
 
 export function BoardView({ boardId }: BoardViewProps) {
   const { data: board, isLoading, error } = useBoard(boardId);
+  const moveCardMutation = useMoveCard(boardId);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px de movimento antes de iniciar drag
+      },
+    })
+  );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const card = board?.columns
+      ?.flatMap((col) => col.cards || [])
+      .find((c) => c?.id === active.id);
+
+    // Card será usado no DragOverlay na próxima fase
+    if (card) {
+      // TODO: Implementar DragOverlay na próxima fase
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over) return;
+
+    const cardId = active.id as string;
+    const newColumnId = over.id as string;
+
+    // Encontrar a coluna atual do card
+    const currentColumn = board?.columns?.find((col) =>
+      col.cards?.some((card) => card.id === cardId)
+    );
+
+    if (!currentColumn) return;
+
+    // Se moveu para coluna diferente
+    if (currentColumn.id !== newColumnId) {
+      moveCardMutation.mutate({
+        id: cardId,
+        data: { newColumnId },
+      });
+    }
+  };
 
   const handleAddCard = (columnId: string) => {
     // TODO: Implementar modal para criar card
@@ -66,26 +120,28 @@ export function BoardView({ boardId }: BoardViewProps) {
         </p>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-4">
-        {board.columns?.map((column) => (
-          <Column
-            key={column.id}
-            column={column}
-            onAddCard={handleAddCard}
-            onEditCard={handleEditCard}
-            onDeleteCard={handleDeleteCard}
-          />
-        ))}
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          {board.columns?.map((column) => (
+            <Column
+              key={column.id}
+              column={column}
+              onAddCard={handleAddCard}
+              onEditCard={handleEditCard}
+              onDeleteCard={handleDeleteCard}
+            />
+          ))}
 
-        {board.columns?.length === 0 && (
-          <div className="text-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 w-full">
-            <p className="text-gray-600">Nenhuma coluna criada ainda</p>
-            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-              Criar Coluna
-            </button>
-          </div>
-        )}
-      </div>
+          {board.columns?.length === 0 && (
+            <div className="text-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 w-full">
+              <p className="text-gray-600">Nenhuma coluna criada ainda</p>
+              <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                Criar Coluna
+              </button>
+            </div>
+          )}
+        </div>
+      </DndContext>
     </div>
   );
 }
