@@ -3,3 +3,9 @@ dist/
 .env
 *.log
 .DS_Store
+
+# TypeScript compiled files in tests directory
+tests/**/*.js
+tests/**/*.js.map
+tests/**/*.d.ts
+tests/**/*.d.ts.map
