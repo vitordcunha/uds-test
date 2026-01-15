@@ -1,15 +1,18 @@
+import { useState } from "react";
 import {
   DndContext,
+  DragOverlay,
   type DragEndEvent,
   type DragStartEvent,
   PointerSensor,
   useSensor,
   useSensors,
-} from '@dnd-kit/core';
-import { useBoard } from '../../../hooks/useBoards';
-import { useMoveCard } from '../../../hooks/useCards';
-import { Column } from '../../columns/components/Column';
-import type { Card } from '../../../types';
+} from "@dnd-kit/core";
+import { useBoard } from "../../../hooks/useBoards";
+import { useMoveCard } from "../../../hooks/useCards";
+import { Column } from "../../columns/components/Column";
+import { Card as CardComponent } from "../../cards/components/Card";
+import type { Card } from "../../../types";
 
 interface BoardViewProps {
   boardId: string;
@@ -18,6 +21,7 @@ interface BoardViewProps {
 export function BoardView({ boardId }: BoardViewProps) {
   const { data: board, isLoading, error } = useBoard(boardId);
   const moveCardMutation = useMoveCard(boardId);
+  const [activeCard, setActiveCard] = useState<Card | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -33,14 +37,14 @@ export function BoardView({ boardId }: BoardViewProps) {
       ?.flatMap((col) => col.cards || [])
       .find((c) => c?.id === active.id);
 
-    // Card será usado no DragOverlay na próxima fase
     if (card) {
-      // TODO: Implementar DragOverlay na próxima fase
+      setActiveCard(card);
     }
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    setActiveCard(null);
 
     if (!over) return;
 
@@ -65,17 +69,17 @@ export function BoardView({ boardId }: BoardViewProps) {
 
   const handleAddCard = (columnId: string) => {
     // TODO: Implementar modal para criar card
-    console.log('Add card to column:', columnId);
+    console.log("Add card to column:", columnId);
   };
 
   const handleEditCard = (card: Card) => {
     // TODO: Implementar modal para editar card
-    console.log('Edit card:', card);
+    console.log("Edit card:", card);
   };
 
   const handleDeleteCard = (cardId: string) => {
     // TODO: Implementar confirmação e exclusão
-    console.log('Delete card:', cardId);
+    console.log("Delete card:", cardId);
   };
 
   if (isLoading) {
@@ -96,7 +100,9 @@ export function BoardView({ boardId }: BoardViewProps) {
           <div className="text-red-600 text-xl mb-2">⚠️</div>
           <p className="text-red-600 font-semibold">Erro ao carregar quadro</p>
           <p className="text-gray-600 mt-2">
-            {error instanceof Error ? error.message : 'Ocorreu um erro inesperado'}
+            {error instanceof Error
+              ? error.message
+              : "Ocorreu um erro inesperado"}
           </p>
         </div>
       </div>
@@ -116,11 +122,16 @@ export function BoardView({ boardId }: BoardViewProps) {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900">{board.name}</h2>
         <p className="text-gray-600 mt-1">
-          {board.columns?.length || 0} {board.columns?.length === 1 ? 'coluna' : 'colunas'}
+          {board.columns?.length || 0}{" "}
+          {board.columns?.length === 1 ? "coluna" : "colunas"}
         </p>
       </div>
 
-      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
         <div className="flex gap-4 overflow-x-auto pb-4">
           {board.columns?.map((column) => (
             <Column
@@ -141,6 +152,18 @@ export function BoardView({ boardId }: BoardViewProps) {
             </div>
           )}
         </div>
+
+        <DragOverlay>
+          {activeCard ? (
+            <div className="rotate-3 opacity-90">
+              <CardComponent
+                card={activeCard}
+                onEdit={() => {}}
+                onDelete={() => {}}
+              />
+            </div>
+          ) : null}
+        </DragOverlay>
       </DndContext>
     </div>
   );
