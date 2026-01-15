@@ -1,7 +1,7 @@
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import type { Card as CardType } from '../../../types';
-import { cn } from '../../../shared/utils/cn';
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import type { Card as CardType } from "../../../types";
+import { cn } from "../../../shared/utils/cn";
 
 interface CardProps {
   card: CardType;
@@ -31,9 +31,9 @@ export function Card({ card, onEdit, onDelete }: CardProps) {
       {...attributes}
       {...listeners}
       className={cn(
-        'bg-white rounded-lg border border-gray-200 p-4 shadow-sm',
-        'hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing',
-        isDragging && 'opacity-50 shadow-lg'
+        "bg-white rounded-lg border border-gray-200 p-4 shadow-sm",
+        "hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing",
+        isDragging && "opacity-50 shadow-lg"
       )}
     >
       <div className="flex items-start justify-between gap-2">
@@ -47,7 +47,12 @@ export function Card({ card, onEdit, onDelete }: CardProps) {
             className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
             aria-label="Editar card"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -64,7 +69,12 @@ export function Card({ card, onEdit, onDelete }: CardProps) {
             className="p-1 text-gray-400 hover:text-red-600 transition-colors"
             aria-label="Excluir card"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -76,7 +86,9 @@ export function Card({ card, onEdit, onDelete }: CardProps) {
         </div>
       </div>
       {card.description && (
-        <p className="mt-2 text-sm text-gray-600 line-clamp-3">{card.description}</p>
+        <p className="mt-2 text-sm text-gray-600 line-clamp-3">
+          {card.description}
+        </p>
       )}
     </div>
   );
