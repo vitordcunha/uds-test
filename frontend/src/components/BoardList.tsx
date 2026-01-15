@@ -1,13 +1,11 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { useBoards } from "../hooks";
 import type { Board } from "../types";
 import CreateBoardModal from "./CreateBoardModal";
 
-interface BoardListProps {
-  onSelectBoard: (board: Board) => void;
-}
-
-function BoardList({ onSelectBoard }: BoardListProps) {
+function BoardList() {
+  const [, setLocation] = useLocation();
   const { data: boards, isLoading, error } = useBoards();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -16,7 +14,7 @@ function BoardList({ onSelectBoard }: BoardListProps) {
   };
 
   const handleBoardClick = (board: Board) => {
-    onSelectBoard(board);
+    setLocation(`/boards/${board.id}`);
   };
 
   if (isLoading) {
