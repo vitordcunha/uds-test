@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z, ZodError } from "zod";
+import { StatusCodes } from "http-status-codes";
+import logger from "../../../shared/logger/logger";
 
 interface ValidationConfig {
   body?: z.ZodSchema<any>;
@@ -30,18 +32,39 @@ export const validate = (config: ValidationConfig) => {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        const errors = (error as ZodError).issues.map((err) => ({
-          field: err.path.join("."),
-          message: err.message,
-        }));
+        const errors = error.issues.map((issue) => {
+          const field = issue.path.length > 0 ? issue.path.join(".") : "root";
+          return {
+            field,
+            message: issue.message,
+            code: issue.code,
+            ...(issue.code === "invalid_type" && {
+              expected: issue.expected,
+              received: issue.received,
+            }),
+          };
+        });
 
-        return res.status(400).json({
-          error: "Validation Error",
-          message: "Invalid input data",
-          details: errors,
+        // Log validation error
+        logger.warn("Validation error", {
+          method: req.method,
+          path: req.path,
+          errors: errors.map((e) => `${e.field}: ${e.message}`).join(", "),
+          ip: req.ip,
+        });
+
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "Invalid input data",
+            details: errors,
+            timestamp: new Date().toISOString(),
+            path: req.path,
+          },
         });
       }
 
+      // If it's not a ZodError, pass it to the error handler
       next(error);
     }
   };

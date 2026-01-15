@@ -2,73 +2,142 @@ import { z } from "zod";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import { boards, columns, cards } from "../../../db/schema";
 
-// Board Schemas - gerados do Drizzle
+// Helper function to ensure string is not empty after trim
+const nonEmptyString = (schema: z.ZodString, fieldName: string) =>
+  schema
+    .trim()
+    .min(1, `${fieldName} is required and cannot be empty`)
+    .refine((val) => val.trim().length > 0, {
+      message: `${fieldName} cannot be only whitespace`,
+    });
+
+// Board Schemas
 export const createBoardSchema = createInsertSchema(boards, {
   name: (schema: z.ZodString) =>
-    schema
-      .min(1, "Board name is required")
+    nonEmptyString(schema, "Board name")
       .max(255, "Board name must be less than 255 characters")
-      .trim(),
-}).pick({ name: true }); // Remove id (auto-gerado)
+      .refine(
+        (val) => val.trim().length >= 1,
+        { message: "Board name must contain at least 1 character" }
+      ),
+}).pick({ name: true });
 
 export const getBoardByIdParamsSchema = z.object({
-  id: z.string().uuid("Board ID must be a valid UUID"),
+  id: z
+    .string({
+      required_error: "Board ID is required",
+      invalid_type_error: "Board ID must be a string",
+    })
+    .uuid("Board ID must be a valid UUID"),
 });
 
-// Column Schemas - gerados do Drizzle
+// Column Schemas
 export const createColumnSchema = createInsertSchema(columns, {
   name: (schema: z.ZodString) =>
-    schema
-      .min(1, "Column name is required")
+    nonEmptyString(schema, "Column name")
       .max(255, "Column name must be less than 255 characters")
-      .trim(),
-  order: (schema: z.ZodNumber) => schema.int().positive().optional(),
-}).pick({ name: true, order: true }); // Remove id e boardId (vem do param)
+      .refine(
+        (val) => val.trim().length >= 1,
+        { message: "Column name must contain at least 1 character" }
+      ),
+  order: (schema: z.ZodNumber) =>
+    schema
+      .int("Order must be an integer")
+      .positive("Order must be a positive number")
+      .optional(),
+}).pick({ name: true, order: true });
 
 export const createColumnParamsSchema = z.object({
-  boardId: z.string().uuid("Board ID must be a valid UUID"),
+  boardId: z
+    .string({
+      required_error: "Board ID is required",
+      invalid_type_error: "Board ID must be a string",
+    })
+    .uuid("Board ID must be a valid UUID"),
 });
 
-// Card Schemas - gerados do Drizzle
+// Card Schemas
 export const createCardSchema = createInsertSchema(cards, {
   title: (schema: z.ZodTypeAny) =>
-    (schema as z.ZodString)
-      .min(1, "Card title is required")
+    nonEmptyString(schema as z.ZodString, "Card title")
       .max(255, "Card title must be less than 255 characters")
-      .trim(),
+      .refine(
+        (val) => val.trim().length >= 1,
+        { message: "Card title must contain at least 1 character" }
+      ),
   description: (schema: z.ZodTypeAny) =>
-    (schema as z.ZodString).max(1000, "Description must be less than 1000 characters").optional(),
-}).pick({ title: true, description: true }); // Remove id e columnId (vem do param)
+    (schema as z.ZodString)
+      .max(1000, "Description must be less than 1000 characters")
+      .optional()
+      .or(z.literal("")),
+}).pick({ title: true, description: true });
 
 export const createCardParamsSchema = z.object({
-  columnId: z.string().uuid("Column ID must be a valid UUID"),
+  columnId: z
+    .string({
+      required_error: "Column ID is required",
+      invalid_type_error: "Column ID must be a string",
+    })
+    .uuid("Column ID must be a valid UUID"),
 });
 
 export const updateCardSchema = createUpdateSchema(cards, {
   title: (schema: z.ZodTypeAny) =>
     (schema as z.ZodString)
-      .min(1, "Card title is required")
-      .max(255, "Card title must be less than 255 characters")
       .trim()
+      .min(1, "Card title cannot be empty")
+      .max(255, "Card title must be less than 255 characters")
+      .refine(
+        (val) => val.trim().length >= 1,
+        { message: "Card title cannot be only whitespace" }
+      )
       .optional(),
   description: (schema: z.ZodTypeAny) =>
     (schema as z.ZodString)
       .max(1000, "Description must be less than 1000 characters")
-      .optional(),
-}).pick({ title: true, description: true }); // Remove id e columnId
+      .optional()
+      .or(z.literal("")),
+})
+  .pick({ title: true, description: true })
+  .refine(
+    (data) => data.title !== undefined || data.description !== undefined,
+    {
+      message: "At least one field (title or description) must be provided",
+    }
+  );
 
 export const updateCardParamsSchema = z.object({
-  id: z.string().uuid("Card ID must be a valid UUID"),
+  id: z
+    .string({
+      required_error: "Card ID is required",
+      invalid_type_error: "Card ID must be a string",
+    })
+    .uuid("Card ID must be a valid UUID"),
 });
 
 export const deleteCardParamsSchema = z.object({
-  id: z.string().uuid("Card ID must be a valid UUID"),
+  id: z
+    .string({
+      required_error: "Card ID is required",
+      invalid_type_error: "Card ID must be a string",
+    })
+    .uuid("Card ID must be a valid UUID"),
 });
 
 export const moveCardParamsSchema = z.object({
-  id: z.string().uuid("Card ID must be a valid UUID"),
+  id: z
+    .string({
+      required_error: "Card ID is required",
+      invalid_type_error: "Card ID must be a string",
+    })
+    .uuid("Card ID must be a valid UUID"),
 });
 
 export const moveCardBodySchema = z.object({
-  newColumnId: z.string().uuid("Column ID must be a valid UUID"),
+  newColumnId: z
+    .string({
+      required_error: "New column ID is required",
+      invalid_type_error: "New column ID must be a string",
+    })
+    .uuid("New column ID must be a valid UUID"),
 });

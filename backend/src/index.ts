@@ -43,7 +43,8 @@ import {
 } from "./routes";
 
 // Middlewares
-import { errorHandler } from "./presentation/http/middlewares/errorHandler";
+import { errorHandler, requestLogger } from "./presentation/http/middlewares";
+import logger from "./shared/logger/logger";
 
 dotenv.config();
 
@@ -54,6 +55,9 @@ export function createApp() {
   // Middleware
   app.use(cors());
   app.use(express.json());
+  
+  // Request logging middleware (must be after body parser)
+  app.use(requestLogger);
 
   // Dependency Injection - Repositories
   const boardRepo = new BoardRepository();
@@ -118,7 +122,10 @@ const app = createApp();
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    logger.info(`Server is running on http://localhost:${PORT}`, {
+      port: PORT,
+      environment: process.env.NODE_ENV || "development",
+    });
   });
 }
 
