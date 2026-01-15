@@ -1,5 +1,10 @@
 import { Router } from "express";
 import { BoardController } from "../presentation/http/controllers/BoardController";
+import {
+  validate,
+  createBoardSchema,
+  getBoardByIdParamsSchema,
+} from "../presentation/http/validators";
 
 export const createBoardsRouter = (boardController: BoardController) => {
   const router = Router();
@@ -10,13 +15,17 @@ export const createBoardsRouter = (boardController: BoardController) => {
   );
 
   // GET /api/boards/:id - Get board by ID
-  router.get("/:id", (req, res, next) =>
-    boardController.getById(req, res, next)
+  router.get(
+    "/:id",
+    validate({ params: getBoardByIdParamsSchema }),
+    (req, res, next) => boardController.getById(req, res, next)
   );
 
   // POST /api/boards - Create a new board
-  router.post("/", (req, res, next) =>
-    boardController.create(req, res, next)
+  router.post(
+    "/",
+    validate({ body: createBoardSchema }),
+    (req, res, next) => boardController.create(req, res, next)
   );
 
   return router;
