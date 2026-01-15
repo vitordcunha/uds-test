@@ -1,1 +1,1 @@
-export { MoveCardDTO } from './MoveCardDTO';
+export { MoveCardDTO } from "./MoveCardDTO";
