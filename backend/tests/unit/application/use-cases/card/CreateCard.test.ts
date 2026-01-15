@@ -8,6 +8,7 @@ import { NotFoundError } from "../../../../../src/shared/errors/NotFoundError";
 // Mocks
 const mockCardRepo: jest.Mocked<ICardRepository> = {
   findById: jest.fn(),
+  findByColumnId: jest.fn(),
   create: jest.fn(),
   update: jest.fn(),
   delete: jest.fn(),
@@ -15,6 +16,7 @@ const mockCardRepo: jest.Mocked<ICardRepository> = {
 
 const mockColumnRepo: jest.Mocked<IColumnRepository> = {
   findById: jest.fn(),
+  findByBoardId: jest.fn(),
   create: jest.fn(),
 };
 

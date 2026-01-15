@@ -6,6 +6,7 @@ import { NotFoundError } from "../../../../../src/shared/errors/NotFoundError";
 // Mock
 const mockCardRepo: jest.Mocked<ICardRepository> = {
   findById: jest.fn(),
+  findByColumnId: jest.fn(),
   create: jest.fn(),
   update: jest.fn(),
   delete: jest.fn(),
