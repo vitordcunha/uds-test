@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { useBoards } from "../hooks";
 import type { Board } from "../types";
-import CreateBoardModal from "./CreateBoardModal";
+import { Modal } from "../shared/components/ui/Modal";
+import { CreateBoardForm } from "../features/boards/components/CreateBoardForm";
 
 function BoardList() {
   const [, setLocation] = useLocation();
@@ -131,19 +132,22 @@ function BoardList() {
                   />
                 </svg>
               </div>
-              <div className="text-sm text-gray-500">
-                {board.columns?.length || 0}{" "}
-                {board.columns?.length === 1 ? "coluna" : "colunas"}
-              </div>
             </div>
           ))}
         </div>
       )}
 
-      <CreateBoardModal
+      <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-      />
+        title="Criar Novo Quadro"
+        size="md"
+      >
+        <CreateBoardForm
+          onSuccess={() => setIsModalOpen(false)}
+          onCancel={() => setIsModalOpen(false)}
+        />
+      </Modal>
     </div>
   );
 }
