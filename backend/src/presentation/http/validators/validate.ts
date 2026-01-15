@@ -2,9 +2,9 @@ import { Request, Response, NextFunction } from "express";
 import { z, ZodError } from "zod";
 
 interface ValidationConfig {
-  body?: z.ZodSchema;
-  params?: z.ZodSchema;
-  query?: z.ZodSchema;
+  body?: z.ZodSchema<any>;
+  params?: z.ZodSchema<any>;
+  query?: z.ZodSchema<any>;
 }
 
 export const validate = (config: ValidationConfig) => {
@@ -17,18 +17,20 @@ export const validate = (config: ValidationConfig) => {
 
       // Validate params
       if (config.params) {
-        req.params = await config.params.parseAsync(req.params);
+        const validatedParams = await config.params.parseAsync(req.params);
+        req.params = validatedParams as typeof req.params;
       }
 
       // Validate query
       if (config.query) {
-        req.query = await config.query.parseAsync(req.query);
+        const validatedQuery = await config.query.parseAsync(req.query);
+        req.query = validatedQuery as typeof req.query;
       }
 
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        const errors = error.errors.map((err) => ({
+        const errors = (error as ZodError).issues.map((err) => ({
           field: err.path.join("."),
           message: err.message,
         }));
