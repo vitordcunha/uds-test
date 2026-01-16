@@ -4,8 +4,8 @@ import { Column } from "../../../src/domain/entities/Column";
 import { Board } from "../../../src/domain/entities/Board";
 import {
   createTestDb,
-  cleanDatabase,
   closeDatabase,
+  cleanDatabaseGlobal,
 } from "../helpers/database";
 import { ColumnRepository } from "../../../src/infrastructure/database/repositories/ColumnRepository";
 import { BoardRepository } from "../../../src/infrastructure/database/repositories/BoardRepository";
@@ -24,11 +24,12 @@ describe("CardRepository Integration Tests", () => {
   });
 
   beforeEach(async () => {
-    await cleanDatabase(testDb.db);
+    // Use global db instance to ensure we're cleaning the same DB that repositories use
+    await cleanDatabaseGlobal();
   });
 
   afterAll(async () => {
-    await cleanDatabase(testDb.db);
+    await cleanDatabaseGlobal();
     await closeDatabase(testDb.pool);
   });
 
@@ -398,7 +399,12 @@ describe("CardRepository Integration Tests", () => {
 
       // Create card with ID but don't persist it
       const nonExistentId = "00000000-0000-0000-0000-000000000000";
-      const card = new Card("Non-existent Card", createdColumn.id!, undefined, nonExistentId);
+      const card = new Card(
+        "Non-existent Card",
+        createdColumn.id!,
+        undefined,
+        nonExistentId
+      );
 
       // Act & Assert
       // The update will try to update a non-existent card, which should cause an error

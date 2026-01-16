@@ -19,4 +19,5 @@ module.exports = {
   passWithNoTests: true,
   setupFilesAfterEnv: ["<rootDir>/tests/integration/setup.ts"],
   testTimeout: 30000, // 30 seconds for integration tests
+  maxWorkers: 1, // Run tests sequentially to avoid database race conditions
 };

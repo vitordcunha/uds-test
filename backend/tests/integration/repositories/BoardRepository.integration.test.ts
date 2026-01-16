@@ -3,8 +3,8 @@ import { Board } from "../../../src/domain/entities/Board";
 import { Column } from "../../../src/domain/entities/Column";
 import {
   createTestDb,
-  cleanDatabase,
   closeDatabase,
+  cleanDatabaseGlobal,
 } from "../helpers/database";
 import { ColumnRepository } from "../../../src/infrastructure/database/repositories/ColumnRepository";
 
@@ -20,11 +20,12 @@ describe("BoardRepository Integration Tests", () => {
   });
 
   beforeEach(async () => {
-    await cleanDatabase(testDb.db);
+    // Use global db instance to ensure we're cleaning the same DB that repositories use
+    await cleanDatabaseGlobal();
   });
 
   afterAll(async () => {
-    await cleanDatabase(testDb.db);
+    await cleanDatabaseGlobal();
     await closeDatabase(testDb.pool);
   });
 

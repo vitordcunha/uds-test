@@ -12,4 +12,5 @@ module.exports = {
   verbose: true,
   passWithNoTests: true,
   setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
+  maxWorkers: 1, // Run tests sequentially to avoid database race conditions
 };
