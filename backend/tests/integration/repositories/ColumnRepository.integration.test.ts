@@ -63,7 +63,12 @@ describe("ColumnRepository Integration Tests", () => {
       const board = new Board("Test Board");
       const createdBoard = await boardRepository.create(board);
 
-      const column = new Column("Ordered Column", createdBoard.id!, undefined, 5);
+      const column = new Column(
+        "Ordered Column",
+        createdBoard.id!,
+        undefined,
+        5
+      );
       const createdColumn = await columnRepository.create(column);
 
       // Act
@@ -155,7 +160,12 @@ describe("ColumnRepository Integration Tests", () => {
       const board = new Board("Mixed Order Board");
       const createdBoard = await boardRepository.create(board);
 
-      const columnWithOrder = new Column("Ordered", createdBoard.id!, undefined, 1);
+      const columnWithOrder = new Column(
+        "Ordered",
+        createdBoard.id!,
+        undefined,
+        1
+      );
       const columnWithoutOrder = new Column("Default Order", createdBoard.id!);
 
       await columnRepository.create(columnWithOrder);
@@ -168,7 +178,9 @@ describe("ColumnRepository Integration Tests", () => {
       expect(result.length).toBeGreaterThanOrEqual(2);
       // Columns with explicit order should come first (order 1)
       // Columns without order get default value 0
-      const orderedColumns = result.filter((c) => c.order !== undefined && c.order !== 0);
+      const orderedColumns = result.filter(
+        (c) => c.order !== undefined && c.order !== 0
+      );
       const defaultOrderColumns = result.filter((c) => c.order === 0);
       expect(orderedColumns.length).toBeGreaterThan(0);
       expect(defaultOrderColumns.length).toBeGreaterThan(0);
@@ -214,7 +226,12 @@ describe("ColumnRepository Integration Tests", () => {
       const board = new Board("Test Board");
       const createdBoard = await boardRepository.create(board);
 
-      const column = new Column("Ordered Column", createdBoard.id!, undefined, 10);
+      const column = new Column(
+        "Ordered Column",
+        createdBoard.id!,
+        undefined,
+        10
+      );
 
       // Act
       const result = await columnRepository.create(column);
@@ -232,7 +249,9 @@ describe("ColumnRepository Integration Tests", () => {
 
       // Act
       const createdColumn = await columnRepository.create(column);
-      const retrievedColumn = await columnRepository.findById(createdColumn.id!);
+      const retrievedColumn = await columnRepository.findById(
+        createdColumn.id!
+      );
 
       // Assert
       expect(retrievedColumn).not.toBeNull();
